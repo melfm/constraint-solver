@@ -7,7 +7,7 @@ import constraints.Constraint;
 
 /**
  * 
- * This models integer variables
+ * This models an integer variables
  *
  */
 
@@ -17,6 +17,7 @@ public class IntVariable {
 	private final Integer low;
 	private final Integer high;
 	
+	// Store these as set, to enable iteration ordering for heuristics
 	private final Set<Integer> valueSet = new LinkedHashSet<Integer>();
 	private final Set<Constraint> constraints = new LinkedHashSet<Constraint>();
 	
@@ -45,7 +46,9 @@ public class IntVariable {
 		return this.constraints;
 	}
 	
-	// Operations
+	// 
+	// Initialize the value set with all the values in the domain
+	//
 	public void initialise() {
 		// Generate all possible assignments
 		this.valueSet.clear();
@@ -54,12 +57,16 @@ public class IntVariable {
 		}
 		
 	}
+	//
 	// For each value, go through the list of *attached* constraints
-	// and check the feasibility
+	// i.e. propagate it to every constraint  associated with this variable
+	//
 	public boolean assignAndPropagate(Integer value) {
 		// First clear the set
 		this.valueSet.clear();
+		// Now assign values
 		this.valueSet.add(value);
+		// Propagate assigned values to all attached constraints
 		for(Constraint c : this.constraints) {
 			if (!c.propagate(this)) {
 				return false;

@@ -31,7 +31,18 @@ public abstract class Constraint {
 	// the variables bound this constraint
 	//
 	public boolean propagate(IntVariable changed) {
-		
+		// Update other variable based on the value of the changed variable
+		assert (changed.valueSet().size() == 1);
+		assert (changed.valueSet().iterator().hasNext());
+		for (IntVariable targetvariable : variables) {
+			if (targetvariable != changed) {
+				// Apply constraint and update the value set
+				applyConstraint(targetvariable, changed.valueSet().iterator().next());
+				if(targetvariable.valueSet().isEmpty()) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 	
