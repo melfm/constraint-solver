@@ -1,24 +1,28 @@
 package constraints;
 
-import core.Variable;
+import core.IntVariable;
 
 /**
  * 
  * Constraint: Not equal
  *
  */
-public class DisequalityConstraint extends EqualityConstraint {
-	
-	// Constructor
-		public DisequalityConstraint(Variable<?> one, Variable<?> two) {
-			super(one, two);
-		}
+public class DisequalityConstraint extends ConstraintTwoVariables {
 
-		// Validate constraint
-		// Hard work done by equal, just negate it
-		@Override
-		public boolean isValid() {
-			return !super.isValid();
-		}
+	// Constructor
+	public DisequalityConstraint(IntVariable var1, IntVariable var2) {
+		super(var1, var2);
+	}
+
+	@Override
+	// Not equal constraint means target cannot possibly take this value
+	// Hence remove it from the domain of possible values
+	public void applyConstraint(IntVariable target, Integer value) {
+		// Remove the given value from target
+		target.valueSet().remove(value);
+		
+	}
+	
+	
 
 }

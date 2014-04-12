@@ -1,18 +1,28 @@
 package core;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import constraints.Constraint;
+
 /**
  * 
  * This models integer variables
  *
  */
 
-public class IntVariable extends Variable<Integer> {
+public class IntVariable {
 	
+	private final String name;
 	private final Integer low;
 	private final Integer high;
 	
+	private final Set<Integer> valueSet = new LinkedHashSet<Integer>();
+	private final Set<Constraint> constraints = new LinkedHashSet<Constraint>();
+	
+	// Constructor
 	public IntVariable(String name, Integer low, Integer high) {
-		super(name);
+		this.name= name;
 		this.low = low;
 		this.high = high;
 	}
@@ -25,22 +35,42 @@ public class IntVariable extends Variable<Integer> {
 	public Integer low() {
 		return this.low;
 	}
-	
-
-	// Setters
-	@Override
-	public void setValue(Integer value) throws Exception {
-		if (value < this.low || value > this.high) {
-			throw new IndexOutOfBoundsException("Value outside the domain");
-		}
-		this.value = value;
+	public String name() {
+		return this.name;
 	}
-
+	public Set<Integer> valueSet() {
+		return this.valueSet;
+	}
+	public Set<Constraint> constraints() {
+		return this.constraints;
+	}
+	
 	// Operations
-	@Override
-	public void reset() {
-		this.value = this.low;
+	public void initialise() {
+		// Generate all possible assignments
+		this.valueSet.clear();
+		for (int i= this.low; i <= this.high; i++) {
+			this.valueSet.add(i);
+		}
 		
+	}
+	// For each value, go through the list of *attached* constraints
+	// and check the feasibility
+	public boolean assignAndPropagate(Integer value) {
+		// First clear the set
+		this.valueSet.clear();
+		this.valueSet.add(value);
+		for(Constraint c : this.constraints) {
+			if (!c.propagate(this)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public void dump() {
+		System.out.println(this.name + " : " + this.valueSet);
 	}
 	
 }

@@ -1,21 +1,28 @@
 package constraints;
 
-import core.Variable;
+import core.IntVariable;
+
 
 public class AllDiffConstraint extends Constraint {
 
-	// Fields
-		private final Variable[] vars;
-
-		// Constructor
-		public AllDiffConstraint(Variable[] vars) {
-			this.vars = vars;
+	
+	// Constructor
+	public AllDiffConstraint(IntVariable[] vars) {
+		// Add to list of variables
+		for(int i = 0; i < vars.length; ++i){
+			// Add the variable to the variables set
+			this.variables.add(vars[i]);
+			// Attach this constraint to that variable
+			vars[i].constraints().add(this);
 		}
+	}
+	
+	
+	@Override
+	public void applyConstraint(IntVariable target, Integer value) {
+		target.valueSet().remove(value);
 		
-		// Validate constraint
-		@Override
-		public boolean isValid() {
-			// TODO: implement AllDiff
-			return true;
-		}
+	}
+
+		
 }

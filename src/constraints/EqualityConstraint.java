@@ -1,30 +1,32 @@
 package constraints;
 
-import core.Variable;
+import core.IntVariable;
 
 /**
  * 
  * Constraint: Equal
  *
  */
-public class EqualityConstraint extends Constraint{
+public class EqualityConstraint extends ConstraintTwoVariables{
 
-	// Fields
-	private final Variable<?> one;
-	private final Variable<?> two;
-	
 	// Constructor
-	public EqualityConstraint(Variable<?> one, Variable<?> two){
-		this.one = one;
-		this.two = two;
+	public EqualityConstraint (IntVariable var1, IntVariable var2) {
+		super(var1, var2);
 	}
 	
+	// Operation
 	@Override
-	public boolean isValid() {
-		if (this.one.value().equals(this.two.value())) {
-			return true;
+	public void applyConstraint(IntVariable target, Integer value) {
+		// Remove everything and add the one back in
+		boolean exists = target.valueSet().contains(value);
+		target.valueSet().clear();
+		if(exists) {
+			// It did exist so only add that value now
+			target.valueSet().add(value);
 		}
-		return false;
+		
 	}
+
+	
 
 }

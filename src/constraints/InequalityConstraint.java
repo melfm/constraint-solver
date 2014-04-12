@@ -1,25 +1,15 @@
 package constraints;
 
-import core.Variable;
+import core.IntVariable;
 
 public class InequalityConstraint  extends Constraint {
 
-		// Fields
-		private final Variable<Integer> one;
-		private final Variable<Integer> two;
+	@Override
+	public void applyConstraint(IntVariable target, Integer value) {
+		// TODO Auto-generated method stub
 		
-		// Constructor
-		public InequalityConstraint(Variable<Integer> one, Variable<Integer> two){
-			this.one = one;
-			this.two = two;
-		}
-		
-		public boolean isValid() {
-			if ((this.one.value()) < (this.two.value())) {
-				return true;
-			}
-			return false;
-		}
+	}
+
 	
 	
 }
