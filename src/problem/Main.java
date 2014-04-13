@@ -10,6 +10,12 @@ import core.Solver;
 
 
 public class Main {
+	
+	// Choose heuristics
+	// Static ordering, sorted by the size of the variable domain
+	private static boolean largestDF = false;
+	private static boolean mostConstrained = true;
+	
 	public static void main(String[] args) throws Exception {
 		//
 		// Run unit tests
@@ -165,7 +171,7 @@ public class Main {
 			solver.addConstraint(new AllDiffConstraint(new IntVariable[] {s61, s62, s63, s70, s71, s72, s79, s80, s81}));			
 	
 			// Search for a solution
-			solver.search();
+			solver.search(largestDF,mostConstrained);
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -216,7 +222,7 @@ public class Main {
 			solver.addConstraint(new ConstraintDiffGreaterThan(x7, x8, 1));
 
 			// Search for a solution
-			solver.search();
+			solver.search(largestDF,mostConstrained);
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -233,7 +239,7 @@ public class Main {
 			IntVariable varY = solver.createIntVariable("Y", 1, 3);
 			IntVariable varZ = solver.createIntVariable("Z", 1, 2);
 			solver.addConstraint(new AllDiffConstraint(new IntVariable[] {varX, varY, varZ}));			
-			solver.search();
+			solver.search(false,false);
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -249,7 +255,7 @@ public class Main {
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 4, 5);
 			solver.addConstraint(new EqualityConstraint(varX, varY));			
-			solver.search();
+			solver.search(false,false);
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -265,7 +271,7 @@ public class Main {
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 1, 2);
 			solver.addConstraint(new DisequalityConstraint(varX, varY));			
-			solver.search();
+			solver.search(false,false);
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -281,7 +287,7 @@ public class Main {
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 1, 2);
 			solver.addConstraint(new ConstraintDiffGreaterThan(varX, varY, 1));			
-			solver.search();
+			solver.search(false,false);
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}

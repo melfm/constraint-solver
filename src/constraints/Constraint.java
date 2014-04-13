@@ -26,10 +26,6 @@ public abstract class Constraint {
 	//
 	public abstract void applyConstraint(IntVariable target, Integer value);
 	
-	//public abstract void applyConstraintonArray(IntVariable[] target, Integer value);
-	
-	
-	
 	
 	//
 	// Propagate the value in the change variable to tell all

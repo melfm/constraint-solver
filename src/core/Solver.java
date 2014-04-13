@@ -1,6 +1,8 @@
 package core;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -24,7 +26,8 @@ public class Solver {
 	private final Set<String> varibaleNames = new HashSet<String>();
 	
 	private int cursor;
-	private int numberOfNodes = 1;
+	private int numberOfNodes = 0;
+	private int arcRevision = 0;
 
 	// Constructor
 	public Solver() {
@@ -94,11 +97,32 @@ public class Solver {
 	// Search for a solution
 	// This calls the recursive guy
 	//
-	public void search() {
+	public void search(boolean largestDF, boolean mostConstrained) {
 		// Init variables and start search
 		for (IntVariable var : this.allVariables) {
 			var.initialise();
 			//var.dump();
+		}
+		if(largestDF){
+			// Now apply some ordering
+			Collections.sort(allVariables, new Comparator<IntVariable>(){
+				@Override
+				public int compare(IntVariable o1, IntVariable o2) {
+					
+					return Integer.compare(o1.valueSet().size(), o2.valueSet().size());
+				}
+			});
+		}
+		
+		if(mostConstrained){
+			// Now apply some ordering
+			Collections.sort(allVariables, new Comparator<IntVariable>(){
+				@Override
+				public int compare(IntVariable o1, IntVariable o2) {
+								
+					return Integer.compare(o1.constraints().size(), o2.constraints().size());
+				}
+			});
 		}
 		// Start exploring search space
 		searchRecursive();
@@ -111,9 +135,10 @@ public class Solver {
 	// This is recursive
 	//
 	private void searchRecursive() {
+		// Start the timer
 		long startTime = System.nanoTime();
 		
-		// Get the next variable possibly with some heuristic
+		// Get the next variable possibly with some heuristic applied before hand
 		IntVariable currentVar = getNextVariable();
 		if (currentVar != null) {
 			// Try assigning each value from the current value set
@@ -132,6 +157,7 @@ public class Solver {
 					if (!isNextVariable() && checkAllVariablesAreSingle()) {
 						printSolution();
 						System.out.println("Number of nodes : " + numberOfNodes);
+						System.out.println("Arc revision : " + arcRevision);
 						long stopTime = System.nanoTime();
 						long elapsedTime = (stopTime - startTime);
 						double seconds = (double)(elapsedTime) / 1000000.0;
@@ -143,6 +169,8 @@ public class Solver {
 				}
 				// Restore variables
 				backup.restore(this);
+				// We are revisiting the arc
+				arcRevision++;
 			}
 			
 		}
@@ -185,4 +213,8 @@ public class Solver {
 		}
 		System.out.println("----------------");
 	}
+
+
+
+	
 }
