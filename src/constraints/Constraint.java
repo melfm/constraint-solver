@@ -26,6 +26,11 @@ public abstract class Constraint {
 	//
 	public abstract void applyConstraint(IntVariable target, Integer value);
 	
+	//public abstract void applyConstraintonArray(IntVariable[] target, Integer value);
+	
+	
+	
+	
 	//
 	// Propagate the value in the change variable to tell all
 	// the variables bound this constraint
@@ -38,6 +43,9 @@ public abstract class Constraint {
 			if (targetvariable != changed) {
 				// Apply constraint and update the value set
 				applyConstraint(targetvariable, changed.valueSet().iterator().next());
+				System.out.print("Changed: " + changed.name() + " = " + changed.valueSet() + ", ");
+				System.out.print("Target: " + targetvariable.name() + " = " + targetvariable.valueSet());
+				System.out.println();
 				if(targetvariable.valueSet().isEmpty()) {
 					return false;
 				}

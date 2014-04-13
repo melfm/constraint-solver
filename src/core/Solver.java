@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import constraints.Constraint;
 
@@ -23,6 +24,7 @@ public class Solver {
 	private final Set<String> varibaleNames = new HashSet<String>();
 	
 	private int cursor;
+	private int numberOfNodes = 1;
 
 	// Constructor
 	public Solver() {
@@ -96,7 +98,7 @@ public class Solver {
 		// Init variables and start search
 		for (IntVariable var : this.allVariables) {
 			var.initialise();
-			var.dump();
+			//var.dump();
 		}
 		// Start exploring search space
 		searchRecursive();
@@ -106,14 +108,16 @@ public class Solver {
 	
 	//
 	// Explore search space using Forward Checking
-	// This guy is recursive
+	// This is recursive
 	//
 	private void searchRecursive() {
+		long startTime = System.nanoTime();
+		
 		// Get the next variable possibly with some heuristic
 		IntVariable currentVar = getNextVariable();
 		if (currentVar != null) {
 			// Try assigning each value from the current value set
-			// Make a copy of the value set as it gets overwitten
+			// Make a copy of the value set as it gets overwritten
 			Set<Integer> valueSet = new LinkedHashSet<Integer>(currentVar.valueSet());
 			for (int value : valueSet) {
 				// Backup variables
@@ -123,14 +127,21 @@ public class Solver {
 					// If successful, check if all variables have been reduced
 					// to a single value. If that is the case and every variable
 					// has been processed, then we have found a solution!
+					// Keep track of number if nodes we are assigning
+					numberOfNodes++;
 					if (!isNextVariable() && checkAllVariablesAreSingle()) {
 						printSolution();
+						System.out.println("Number of nodes : " + numberOfNodes);
+						long stopTime = System.nanoTime();
+						long elapsedTime = (stopTime - startTime);
+						double seconds = (double)(elapsedTime) / 1000000.0;
+					    System.out.println("Time taken " + seconds);
 						System.exit(0);
 					}
-					// Otherwise recurse to contingue search
+					// Otherwise recurse to continue search
 					searchRecursive();
 				}
-				// Resotre variables
+				// Restore variables
 				backup.restore(this);
 			}
 			
