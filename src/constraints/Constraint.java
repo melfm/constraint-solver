@@ -39,9 +39,9 @@ public abstract class Constraint {
 			if (targetvariable != changed) {
 				// Apply constraint and update the value set
 				applyConstraint(targetvariable, changed.valueSet().iterator().next());
-				System.out.print("Changed: " + changed.name() + " = " + changed.valueSet() + ", ");
-				System.out.print("Target: " + targetvariable.name() + " = " + targetvariable.valueSet());
-				System.out.println();
+//				System.out.print("Changed: " + changed.name() + " = " + changed.valueSet() + ", ");
+//				System.out.print("Target: " + targetvariable.name() + " = " + targetvariable.valueSet());
+//				System.out.println();
 				if(targetvariable.valueSet().isEmpty()) {
 					return false;
 				}

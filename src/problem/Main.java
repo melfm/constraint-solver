@@ -1,20 +1,20 @@
 package problem;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import constraints.AllDiffConstraint;
 import constraints.ConstraintDiffGreaterThan;
 import constraints.DisequalityConstraint;
 import constraints.EqualityConstraint;
 import core.IntVariable;
+import core.SolutionPresenter;
 import core.Solver;
 
 
 
 public class Main {
-	
-	// Choose heuristics
-	// Static ordering, sorted by the size of the variable domain
-	private static boolean largestDF = false;
-	private static boolean mostConstrained = true;
 	
 	public static void main(String[] args) throws Exception {
 		//
@@ -45,7 +45,27 @@ public class Main {
 		
 		try {
 			// Create solver
-			Solver solver = new Solver();
+			Solver solver = new Solver(new SolutionPresenter() {
+				@Override
+				public void present(List<IntVariable> solution) {
+					// Sort them by name and print it
+					Collections.sort(solution, new Comparator<IntVariable>(){
+						@Override
+						public int compare(IntVariable o1, IntVariable o2) {
+							// Reverse the order of sort
+							return o1.name().compareTo(o2.name());
+						}
+					});
+					for (int col=0; col < 9; ++col) {
+						for (int row=0; row < 9; ++row) {
+							int index = col*9 + row;
+							IntVariable var = solution.get(index);
+							System.out.print("|{" + var.name() + "} " + var.valueSet().iterator().next());
+						}
+						System.out.println("|");
+					}
+				}
+			});
 			
 			// Define variables
 			// Row 1
@@ -170,8 +190,14 @@ public class Main {
 			solver.addConstraint(new AllDiffConstraint(new IntVariable[] {s58, s59, s60, s67, s68, s69, s76, s77, s78}));			
 			solver.addConstraint(new AllDiffConstraint(new IntVariable[] {s61, s62, s63, s70, s71, s72, s79, s80, s81}));			
 	
+			solver.startTimer();
+			solver.enableDynamic();
+			//solver.enablestaticsdf();
+			//solver.enablelargedf();
+			
+			//solver.enablemostConstrained();
 			// Search for a solution
-			solver.search(largestDF,mostConstrained);
+			solver.search();
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -183,7 +209,7 @@ public class Main {
 		//
 		try {
 			// Create solver
-			Solver solver = new Solver();
+			Solver solver = new Solver(null);
 			
 			// Define variables
 			IntVariable x1 = solver.createIntVariable("X1", 1, 8);
@@ -221,8 +247,15 @@ public class Main {
 			
 			solver.addConstraint(new ConstraintDiffGreaterThan(x7, x8, 1));
 
+			solver.startTimer();
+			//solver.enableDynamic();
+			//solver.enablestaticsdf();
+			//solver.enablelargedf();
+			
+			//solver.enablemostConstrained();
+			
 			// Search for a solution
-			solver.search(largestDF,mostConstrained);
+			solver.search();
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -234,12 +267,12 @@ public class Main {
 	private static void test_AllDiff() {
 		try {
 			System.out.println("Testing AllDiff...");
-			Solver solver = new Solver();
+			Solver solver = new Solver(null);
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 1, 3);
 			IntVariable varZ = solver.createIntVariable("Z", 1, 2);
 			solver.addConstraint(new AllDiffConstraint(new IntVariable[] {varX, varY, varZ}));			
-			solver.search(false,false);
+			solver.search();
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -251,11 +284,11 @@ public class Main {
 	private static void test_Equal() {
 		try {
 			System.out.println("Testing Equal...");
-			Solver solver = new Solver();
+			Solver solver = new Solver(null);
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 4, 5);
 			solver.addConstraint(new EqualityConstraint(varX, varY));			
-			solver.search(false,false);
+			solver.search();
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -267,11 +300,11 @@ public class Main {
 	private static void test_NotEqual() {
 		try {
 			System.out.println("Testing NotEqual...");
-			Solver solver = new Solver();
+			Solver solver = new Solver(null);
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 1, 2);
 			solver.addConstraint(new DisequalityConstraint(varX, varY));			
-			solver.search(false,false);
+			solver.search();
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
@@ -283,11 +316,11 @@ public class Main {
 	private static void test_DiffGreaterThan() {
 		try {
 			System.out.println("Testing DiffGreaterThan...");
-			Solver solver = new Solver();
+			Solver solver = new Solver(null);
 			IntVariable varX = solver.createIntVariable("X", 1, 4);
 			IntVariable varY = solver.createIntVariable("Y", 1, 2);
 			solver.addConstraint(new ConstraintDiffGreaterThan(varX, varY, 1));			
-			solver.search(false,false);
+			solver.search();
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}

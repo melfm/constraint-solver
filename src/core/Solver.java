@@ -4,13 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import constraints.Constraint;
 
@@ -21,6 +17,7 @@ import constraints.Constraint;
  */
 public class Solver {
 	// Fields
+	private SolutionPresenter presenter;
 	private final List<Constraint> allConstraints = new ArrayList<Constraint>();
 	private final List<IntVariable> allVariables = new ArrayList<IntVariable>();
 	private final Set<String> varibaleNames = new HashSet<String>();
@@ -28,11 +25,41 @@ public class Solver {
 	private int cursor;
 	private int numberOfNodes = 0;
 	private int arcRevision = 0;
+	private boolean dynamicsdf;
+	private boolean statisdf;
+	private boolean mostConstrained;
+	private boolean largedf;
+	
+	
+	
+	private double timetakne;
+	private long startTime;
 
 	// Constructor
-	public Solver() {
-
-	}
+		public Solver(SolutionPresenter presenter) {
+			if (presenter != null) {
+				this.presenter = presenter;
+			} else {
+				// Default solution presenter
+				this.presenter = new SolutionPresenter() {
+					@Override
+					public void present(List<IntVariable> solution) {
+						Collections.sort(allVariables, new Comparator<IntVariable>(){
+						@Override
+						public int compare(IntVariable o1, IntVariable o2) {
+							// Reverse the order of sort
+							return o1.name().compareTo(o2.name());
+						}
+					});
+						System.out.println("----------------");
+						for (IntVariable v : solution) {
+							System.out.println(v.name() + ":" + v.valueSet());
+						}
+						System.out.println("----------------");
+					}
+				};
+			}
+		}
 
 	// Getters
 	public List<IntVariable> allVariables() {
@@ -55,7 +82,38 @@ public class Solver {
 	public void setCursor(int cursor) {
 		this.cursor = cursor;
 	}
+	
+	public void enableDynamic(){
+		this.dynamicsdf = true;
+	}
+	
+	public void enablestaticsdf(){
+		this.statisdf = true;
+	}
+	
+	public void enablelargedf(){
+		this.largedf = true;
+	}
+	
+	public void enablemostConstrained(){
+		this.mostConstrained = true;
+	}
+	
+	public void startTimer(){
+		// Start the timer
+		this.startTime = System.nanoTime();
+	}
+	
+	public void stopTimer(){
+		long stopTime = System.nanoTime();
+		long elapsedTime = (stopTime - startTime);
+		timetakne = (double)(elapsedTime) / 1000000000.0;
+	    System.out.println("Time taken " + timetakne);
+	}
 
+	public double getTimeTaken(){
+		return this.timetakne;
+	}
 	//
 	// Reset solver state
 	//
@@ -97,33 +155,45 @@ public class Solver {
 	// Search for a solution
 	// This calls the recursive guy
 	//
-	public void search(boolean largestDF, boolean mostConstrained) {
+	public void search() {
 		// Init variables and start search
 		for (IntVariable var : this.allVariables) {
 			var.initialise();
 			//var.dump();
 		}
-		if(largestDF){
+		if(statisdf){
 			// Now apply some ordering
 			Collections.sort(allVariables, new Comparator<IntVariable>(){
 				@Override
 				public int compare(IntVariable o1, IntVariable o2) {
-					
 					return Integer.compare(o1.valueSet().size(), o2.valueSet().size());
+
 				}
 			});
 		}
 		
+		if(largedf){
+			// Now apply some ordering
+			Collections.sort(allVariables, new Comparator<IntVariable>(){
+				@Override
+				public int compare(IntVariable o1, IntVariable o2) {
+					// Reverse the order of sort	
+					return Integer.compare(o2.valueSet().size(), o1.valueSet().size());
+				}
+			});
+		}
+	
 		if(mostConstrained){
 			// Now apply some ordering
 			Collections.sort(allVariables, new Comparator<IntVariable>(){
 				@Override
 				public int compare(IntVariable o1, IntVariable o2) {
-								
-					return Integer.compare(o1.constraints().size(), o2.constraints().size());
+					// Sort by number of constraints			
+					return Integer.compare(o2.constraints().size(), o1.constraints().size());
 				}
 			});
 		}
+
 		// Start exploring search space
 		searchRecursive();
 		// If recursive search completes in full, then solution not found
@@ -135,10 +205,7 @@ public class Solver {
 	// This is recursive
 	//
 	private void searchRecursive() {
-		// Start the timer
-		long startTime = System.nanoTime();
-		
-		// Get the next variable possibly with some heuristic applied before hand
+		// Get the next variable possibly with some heuristic
 		IntVariable currentVar = getNextVariable();
 		if (currentVar != null) {
 			// Try assigning each value from the current value set
@@ -155,13 +222,10 @@ public class Solver {
 					// Keep track of number if nodes we are assigning
 					numberOfNodes++;
 					if (!isNextVariable() && checkAllVariablesAreSingle()) {
-						printSolution();
+						this.presenter.present(this.allVariables);
 						System.out.println("Number of nodes : " + numberOfNodes);
 						System.out.println("Arc revision : " + arcRevision);
-						long stopTime = System.nanoTime();
-						long elapsedTime = (stopTime - startTime);
-						double seconds = (double)(elapsedTime) / 1000000.0;
-					    System.out.println("Time taken " + seconds);
+						stopTimer();
 						System.exit(0);
 					}
 					// Otherwise recurse to continue search
@@ -181,6 +245,15 @@ public class Solver {
 	//
 	private IntVariable getNextVariable() {
 		if (isNextVariable()) {
+			
+			if(dynamicsdf){
+				Collections.sort(allVariables, new Comparator<IntVariable>(){
+					@Override
+					public int compare(IntVariable o1, IntVariable o2) {	
+						return Integer.compare(o1.valueSet().size(), o2.valueSet().size());
+					}
+				});
+			}
 			return this.allVariables.get(this.cursor++);
 		}
 		return null;
@@ -208,6 +281,15 @@ public class Solver {
 	private void printSolution() {
 		System.out.println("Found a solution!");
 		System.out.println("----------------");
+		// Sort them by name and print it
+		Collections.sort(allVariables, new Comparator<IntVariable>(){
+			@Override
+			public int compare(IntVariable o1, IntVariable o2) {
+				
+				// Reverse the order of sort
+				return o1.name().compareTo(o2.name());
+			}
+		});
 		for (IntVariable v : this.allVariables) {
 			System.out.println(v.name() + ":" + v.valueSet());
 		}
